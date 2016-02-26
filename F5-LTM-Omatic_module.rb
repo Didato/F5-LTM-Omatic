@@ -1,4 +1,4 @@
-# F5-LTM-Omatic :  "Elastic F5 Automation"
+F5-LTM-Omatic :  "Elastic F5 Automation"
 # F5 LTM Automation for Services Deployment and Management. 
 # This Code is in Ruby and requires a Tranport to send JSON Formated Messages, These are parsed and executed.  You will want to read the RunBook to understand the usage.  
 # I reccomend using and AMQ, Puppet or NRPE agent for Command Parser, but anyting will work.  Community supported API for Ruby may be better choice. 
@@ -15,7 +15,7 @@
 #     parameters:{ 
 #     "user":"bigpimpin",
 #     "host":"f5host", 
-#     "ip":"192.168.12.14"
+#     "ip":"192.x.12.14"
 #     "port : 8080"
 #     "vlan : 2001"
 #     "poolname : pool_123"
@@ -23,7 +23,7 @@
 #     "vsname : VirtualServer1"  #VS Name usually has a corrosoponding Desinsation IP as the Virtaul Address
 #     "vlanname : App123_LB_Internal"
 #     "interfacenumber : 1.2"
-#     "source-addr : 192.168.12.122"
+#     "source-addr : 192.x.12.122"
 #     "timeout : 15"  #seconds    
 #     "mask : 255.255.255.0" #octet 
 #     "pr_cookie : Cookie_NAME" # Pick a Cookie name like My_First_Cooking
@@ -101,27 +101,27 @@ end # Common ssh Method
 #	ContainerName:	LPTC
 #	MajorVLAN:	101
 #	MinorVLAN:	2011
-#	MinorAddrBlk:	192.168.4.240/28
+#	MinorAddrBlk:	192.x.4.240/28
 #
 # sample commands. Note that all the nodes are created whether they exist or not.  That way, the load balancer is setup once initially and does
 #   not need to be changed when hosts are added or removed from a container by the Configurator.
 #   FIXME: the size of the container is currently hard-coded at 11 rather than passed as a parameter
 # create /net vlan VLAN2011 tag 2011 interfaces add { LAG1 { tagged } }
 # create /net route-domain RD2011 id 2011 parent RD101 strict enabled vlans add { VLAN2011 }
-# create /net self /pod1.prod/SelfIP-LB1-2011 address 192.168.4.242%2011/28 vlan VLAN2011 traffic-group traffic-group-local-only
-# create /net self /pod1.prod/SelfIP-LB-2011 address 192.168.4.241%2011/28 vlan VLAN2011 traffic-group traffic-group-1
-# create /ltm snat /pod1.prod/VLAN2011-Out origins add { 192.168.4.240%2011/28 { } } translation VLAN101-Out vlans-enabled vlans add { VLAN2011 } description "LPTC Container"
-# create /ltm node /pod1.prod/LPTC001 address 192.168.4.244%2011
-# create /ltm node /pod1.prod/LPTC002 address 192.168.4.245%2011
-# create /ltm node /pod1.prod/LPTC003 address 192.168.4.246%2011
-# create /ltm node /pod1.prod/LPTC004 address 192.168.4.247%2011 
-# create /ltm node /pod1.prod/LPTC005 address 192.168.4.248%2011
-# create /ltm node /pod1.prod/LPTC006 address 192.168.4.249%2011
-# create /ltm node /pod1.prod/LPTC007 address 192.168.4.250%2011
-# create /ltm node /pod1.prod/LPTC008 address 192.168.4.251%2011
-# create /ltm node /pod1.prod/LPTC009 address 192.168.4.252%2011
-# create /ltm node /pod1.prod/LPTC010 address 192.168.4.253%2011
-# create /ltm node /pod1.prod/LPTC011 address 192.168.4.254%2011
+# create /net self /pod1.prod/SelfIP-LB1-2011 address 192.x.4.242%2011/28 vlan VLAN2011 traffic-group traffic-group-local-only
+# create /net self /pod1.prod/SelfIP-LB-2011 address 192.x.4.241%2011/28 vlan VLAN2011 traffic-group traffic-group-1
+# create /ltm snat /pod1.prod/VLAN2011-Out origins add { 192.x.4.240%2011/28 { } } translation VLAN101-Out vlans-enabled vlans add { VLAN2011 } description "LPTC Container"
+# create /ltm node /pod1.prod/LPTC001 address 192.x.4.244%2011
+# create /ltm node /pod1.prod/LPTC002 address 192.x.4.245%2011
+# create /ltm node /pod1.prod/LPTC003 address 192.x.4.246%2011
+# create /ltm node /pod1.prod/LPTC004 address 192.x.4.247%2011 
+# create /ltm node /pod1.prod/LPTC005 address 192.x.4.248%2011
+# create /ltm node /pod1.prod/LPTC006 address 192.x.4.249%2011
+# create /ltm node /pod1.prod/LPTC007 address 192.x.4.250%2011
+# create /ltm node /pod1.prod/LPTC008 address 192.x.4.251%2011
+# create /ltm node /pod1.prod/LPTC009 address 192.x.4.252%2011
+# create /ltm node /pod1.prod/LPTC010 address 192.x.4.253%2011
+# create /ltm node /pod1.prod/LPTC011 address 192.x.4.254%2011
 # 
   def create_container(message)
    begin
@@ -242,8 +242,8 @@ end # Common ssh Method
 #	PodName:	  pod1.prod
 #	ContainerName:	  ACL
 #	ServiceName:	  lcnint
-#	VIPIP:		  172.24.72.193
-#       MajorVLAN:        102
+#	VIPIP:		  x.x.x.x
+# MajorVLAN:        102
 #	ServicePort:	  80
 #	ServiceProtocol:  HTTP
 #	ClientPort:	  9620
@@ -254,7 +254,7 @@ end # Common ssh Method
 # sample commands: 
 # create /ltm monitor http /pod1.prod/lcnint-http recv "ack" send "GET /lcnint/healthcheck HTTP/1.0\\r\\n\\r\\n"
 # create /ltm pool /pod1.prod/ACL-lcnint-Pool monitor lcnint-http members add { ACL001:9620 ACL002:9620 ACL003:9620 ACL004:9620 ACL005:9620 ACL006:9620 ACL007:9620 ACL008:9620 ACL009:9620 ACL010:9620 ACL011:9620 }
-# create /ltm virtual /pod1.prod/ACL-lcnint destination 172.24.72.193%102:80 pool /pod1.prod/ACL-lcnint-Pool profiles add { tcp }
+# create /ltm virtual /pod1.prod/ACL-lcnint destination x.x.x.x%102:80 pool /pod1.prod/ACL-lcnint-Pool profiles add { tcp }
 
   def create_service(message)
    begin
@@ -514,7 +514,7 @@ def delete_pool(message)
   #   parameters = message.parameters
     
   #   @log.info("LB create_netself command received from #{message.from}: #{message.command} #{message.parameters.to_s}")
-  #   #fixme need to change ip peramaters to "ip/net"  --> 192.168.1.55/24    
+  #   #fixme need to change ip peramaters to "ip/net"  --> 192.x.1.55/24    
   #   case parameters.fetch("lb_type")
   #         when "f5" then f5_command(message,"tmsh create net self #{parameters.fetch("ip")} vlan #{parameters.fetch("vlanname")}")
   #         when "array" then array_command("...")
@@ -593,9 +593,9 @@ def create_netself_in_partition_floating(message)
 ## => create a method for crerate partitions 
 #
 # when "f5" then f5_commands(message,["tmsh create ltm pool #{parameters.fetch("poolname")}","cmd2"])
-# root@tw-lb1-a-mgmt(Active)(tmos.auth.partition.pod1.prod)# tmsh modify auth partition pod1.prod create /net self 172.24.64.32/21 Vlan VLAN_101 allow-service all unit 0
-#    tmsh modify cli admin-partitions update-partition pod1.pmt; tmsh create net self 172.24.64.111%111/21 Vlan VLAN_111 allow-service all unit 0
-#    tmsh modify cli admin-partitions update-partition pod1.pmt; tmsh create net self 172.24.64.111/21 Vlan VLAN_111 allow-service all unit 0
+# root@tw-lb1-a-mgmt(Active)(tmos.auth.partition.pod1.prod)# tmsh modify auth partition pod1.prod create /net self x.24.64.32/21 Vlan VLAN_101 allow-service all unit 0
+#    tmsh modify cli admin-partitions update-partition pod1.pmt; tmsh create net self x.24.64.111%111/21 Vlan VLAN_111 allow-service all unit 0
+#    tmsh modify cli admin-partitions update-partition pod1.pmt; tmsh create net self x.24.64.111/21 Vlan VLAN_111 allow-service all unit 0
 
 #  in v11 tmsh cd /partitionname ; tmsh create netself 
 
