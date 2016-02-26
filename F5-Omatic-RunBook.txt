@@ -1,1 +1,321 @@
+Runbook for F5 configuration with cscc_lb_module.rb
+Example Parameters:
+By: Chris Didato (chrisdidato@gmail.com)
+Example Parameters:
+##F5 Load Balancer Config Module
+#
+###########################################
+# Example parameters:
+# { /standard headers/,
+# parameters:{
+# "user":"admin",
+# "host":"f5host",
+# "ip":"192.168.x.x"
+# "port : 8080"
+# "vlan : 2001"
+# "poolname : pool_123"
+# "ipnet : /24" # Bits
+# "vsname : VirtualServer1" #VS Name usually has a corrosoponding Desinsation IP as the Virtaul Address
+# "vlanname : App123_LB_Internal"
+# "interfacenumber : 1.2"
+# "source-addr : 192.168.x.x"
+# "timeout : 15" #seconds
+# "mask : 255.255.255.0" #octet
+# "pr_cookie : Cookie_NAME" # Pick a Cookie name like My_First_Cooking
+# "expiration : 2:0:0:0" # this is set for 2 Days: Formmat = D:H:M:S
+# "monitorname : MY_HTTP " # Put in your own name for a custom monitor.
+# "recv : "Service is Alive" "
+# "geturl : GET /index.html\r\n" : recv "Server [1-3]" || OR GET www.yahoo.com/index.html: recv "Service is Alive"
+# "pr_srcname : MY_PR_SOURCE_NAME" # name for Source Value
+# }
+# }
+###########################################
+---------------------------------
+Configure VLAN info
+1:VLAN Configuration
+create_vlan_addtag_modlacp
+JSON:
+{
+"to": "netadm1@foo.foobar.com",
+"service": "f5Omatic",
+"uuid": "001",
+"command": "create_vlan_addtag_modlacp",
+F5 RunBook -new
+Saturday, May 11, 2013
+10:57 PM
+Ruby Page 1
+"command": "create_vlan_addtag_modlacp",
+"parameters": {
+"lb_type": "f5",
+"host": "172.x.x.x",
+"user": "root",
+"password": "Passwd",
+"vlanname": "VLAN_2008",
+"lacpnumber": "LACP32",
+"partitionname": "pod1.prod",
+"vlantagnumber": "2008",
+"interfacenumber": "{ LACP32 }"
+}
+}
+=======================================
+2: create_netself
+2.1 Floating IP's:
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"create_netself_in_partition_floating",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"vlanname":" VLAN2008 floating enabled unit 1",
+"ip_mask":"172.x.x.x/21"
+}
+}
+2.2 create_netself_in_partition
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"create_netself_in_partition",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"vlanname":"VLAN2008",
+"partitionname":"pod1.prod",
+"ip_mask":"172.x.x.x/21"
+}
+}
+==========================
+3 Save Config
+"partitionname": "pod1.prod",
+Ruby Page 2
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"save_config",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"configtype":"sys"
+}
+}
+=====================
+4: Add Pool
+create a pool. Name will bePOOL1and you currently have to add one member at a time. Adding multiple members at creation time not supported yet. #fixme
+172.x.x.x:80
+
+You can use either number of the port or name, in this case it ishttp.
+root@lb-a(Active)(tmos)# create ltm pool POOL1
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"add_pool",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"partitionname":"pod1.prod",
+"poolname":"pool1"
+}
+}
+4.1 Delete Pools
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"delete_pool",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"poolname":"pool1"
+}
+}
+Ruby Page 3
+=====================
+5: Add Member to Pool
+add_member
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"add_member",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"poolname":"pool1",
+"ip":"172.x.x.x",
+"port":"80",
+"partitionname":"pod1.prod"
+}
+}
+5.1 remove_members
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"remove_member",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"poolname":"pool1"
+"ip":"172.x.x.x"
+"port":"80"
+}
+===========
+===========
+6. Create VIP
+create virtual IP address (VIP). Name will beVS_HTTPand destination IP –VIP will be10.10.1.100with port80. It will be associated with poolPOOL1.
+create ltm virtual VS_HTTP destination 10.10.1.100:80 pool POOL1
+Load Balancing for is Passwd to Round Robin
+Create VIP and assign Vlan by name
+6.1 create_vs_add_vlans
+JSON
+{
+Ruby Page 4
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"create_vs_add_vlans",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"poolname":"pool1",
+"ip":"172.x.x.x",
+"port":"80",
+"vsname":"vs_2008_80",
+"vlanname":"VLAN2008",
+"partitionname":"pod1.prod"
+}
+}
+6.2 Monitoring
+Monitor a Specific Node with Passwd icmp monitors:
+6.2.2 hc_node
+ICMP Only
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"hc_node",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"monitorname":"gateway_icmp",
+"node":"172.x.x.x",
+"partitionname":"pod1.prod"
+}
+}
+Custom HTTP Monitor
+create_hc
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"create_hc",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"monitorname":"My_Monitor",
+"geturl":"GET /index.html\\r\\n",
+"recv":"Service is UP:",
+Ruby Page 5
+"recv":"Service is UP:",
+"partitionname":"pod1.prod"
+}
+}
+{
+"to": "netadm1@foo.foobar.com",
+"service": "f5Omatic",
+"uuid": "001",
+"command": "create_hc",
+"parameters": {
+"lb_type": "f5",
+"host": "172.x.x.x",
+"user": "root",
+"password": "Passwd",
+"monitorname": "My_Monitortest1",
+"geturl": "GET /index.html\\r\\n",
+"recv": "Service is UP:",
+"partitionname": "pod1.prod"
+}
+}
+6.2.3 Apply Monitor to $POOL
+apply_hc
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"apply_hc",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"monitorname":"gateway_icmp",
+"poolname":"pool1",
+"partitionname":"pod1.prod"
+}
+}
+-----------------------------
+6.3 Persistence
+Cookie Persistence
+create_cookie
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"hc_node",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+Ruby Page 6
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"pr_cookie":"Persistance_cookie_Name",
+"expiration ":" 2:0:0:0"
+}
+}
+apply_cookie
+-----------------------------------------------
+6.4 SNAT
+add_snat
+{
+"to":"netadm1@foo.foobar.com",
+"service":"f5Omatic",
+"uuid":"001",
+"command":"add_snat",
+"parameters": {
+"lb_type":"f5",
+"host": "172.x.x.x",
+"user":"root",
+"password":"Passwd",
+"partitionname":"pod1.prod",
+"snatname":"snat103",
+"tranlation-ip":"172.x.x.x/22"
+}
+}
+Ruby Page 7
 
